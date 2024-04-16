@@ -2,8 +2,10 @@ package dio.onceito_de_Padroes_de_Projetodemo.controller;
 
 import dio.onceito_de_Padroes_de_Projetodemo.model.User;
 import dio.onceito_de_Padroes_de_Projetodemo.service.UserService;
+import dio.onceito_de_Padroes_de_Projetodemo.dto.*;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import io.swagger.v3.oas.annotations.Operation;
@@ -12,6 +14,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
+import org.springframework.http.ResponseEntity;
 import java.util.List;
 
 @Tag(name = "Usuários", description = "Recursos de Usuários")
@@ -45,17 +48,27 @@ public class UserController {
     @Operation(summary = "Criar um usuário", description = "Adiciona um novo usuário à base de dados", tags = { "Usuários" })
     @ApiResponse(responseCode = "201", description = "Usuário criado com sucesso", content = @Content(mediaType = "application/json", schema = @Schema(implementation = User.class)))
     @PostMapping
-    public User createUser(@Parameter(description = "Objeto de usuário para criação") @Valid @RequestBody User user){
-        return userService.saveUser(user);
+    public ResponseEntity<User> createUser(@Parameter(description = "Dados de registro do usuário para criação") @Valid @RequestBody UserRegistrationDto registrationDto){
+        User newUser = new User();
+        newUser.setUsername(registrationDto.getUsername());
+        newUser.setEmail(registrationDto.getEmail());
+        newUser.setPassword(userService.encodePassword(registrationDto.getPassword()));
+        User savedUser = userService.saveUser(newUser);
+
+        if (savedUser != null && savedUser.getId() > 0) {
+            return ResponseEntity.status(HttpStatus.CREATED).body(savedUser);
+        } else {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        }
     }
 
     @Operation(summary = "Atualizar um usuário", description = "Atualiza os detalhes de um usuário existente", tags = { "Usuários" })
     @ApiResponse(responseCode = "200", description = "Usuário atualizado com sucesso", content = @Content(mediaType = "application/json", schema = @Schema(implementation = User.class)))
     @ApiResponse(responseCode = "404", description = "Usuário não encontrado")
     @PutMapping("/{id}")
-    public ResponseEntity<User> updateUser(@Parameter(description = "ID do usuário para atualização") @PathVariable long id, @Parameter(description = "Objeto de usuário com novos detalhes") @RequestBody User userDetails) {
+    public ResponseEntity<User> updateUser(@PathVariable long id, @RequestBody User userDetails) {
         User updatedUser = userService.updateUser(id, userDetails);
-        if (updatedUser != null){
+        if (updatedUser != null) {
             return ResponseEntity.ok(updatedUser);
         } else {
             return ResponseEntity.notFound().build();
