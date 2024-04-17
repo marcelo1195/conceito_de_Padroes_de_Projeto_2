@@ -37,9 +37,3 @@ Instruções para configurar e executar o projeto localmente:
 3. Acesse os endpoints através de um navegador ou cliente HTTP como Postman.
 4. A documentação da API pode ser acessada em `http://localhost:8080/swagger-ui.html`.
 
-## Testes
-
-Descrição de como executar os testes unitários e de integração:
-
-```shell
-./mvnw test
