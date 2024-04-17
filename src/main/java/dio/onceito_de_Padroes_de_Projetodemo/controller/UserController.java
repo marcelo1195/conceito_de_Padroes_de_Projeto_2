@@ -45,22 +45,6 @@ public class UserController {
         }
     }
 
-    @Operation(summary = "Criar um usuário", description = "Adiciona um novo usuário à base de dados", tags = { "Usuários" })
-    @ApiResponse(responseCode = "201", description = "Usuário criado com sucesso", content = @Content(mediaType = "application/json", schema = @Schema(implementation = User.class)))
-    @PostMapping
-    public ResponseEntity<User> createUser(@Parameter(description = "Dados de registro do usuário para criação") @Valid @RequestBody UserRegistrationDto registrationDto){
-        User newUser = new User();
-        newUser.setUsername(registrationDto.getUsername());
-        newUser.setEmail(registrationDto.getEmail());
-        newUser.setPassword(userService.encodePassword(registrationDto.getPassword()));
-        User savedUser = userService.saveUser(newUser);
-
-        if (savedUser != null && savedUser.getId() > 0) {
-            return ResponseEntity.status(HttpStatus.CREATED).body(savedUser);
-        } else {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
-        }
-    }
 
     @Operation(summary = "Atualizar um usuário", description = "Atualiza os detalhes de um usuário existente", tags = { "Usuários" })
     @ApiResponse(responseCode = "200", description = "Usuário atualizado com sucesso", content = @Content(mediaType = "application/json", schema = @Schema(implementation = User.class)))
